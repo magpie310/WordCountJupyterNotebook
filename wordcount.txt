@@ -17,13 +17,6 @@ import io
 import matplotlib.pyplot as plt
 import re
 
-# データを確認# 
-
-# 読み込んだデータをpandasのdataframeで扱えるようにする
-#df = pd.read_csv(io.StringIO(uploaded['merosu.txt'].decode('utf-8')))
-
-# 中身を確認する
-#df.head()
 
 # テキストで不要な文言を除く# 
 
