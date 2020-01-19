@@ -13,10 +13,9 @@ uploaded = files.upload()
 
 # 必要なライブラリをインポート# 
 
-#import pandas as pd
-#import io
-#import matplotlib.pyplot as plt
-#import re
+import io
+import matplotlib.pyplot as plt
+import re
 
 # データを確認# 
 
