@@ -1,0 +1,121 @@
+
+
+#日本語表示のためのフォントをインストール
+# 
+
+!apt-get -y install fonts-ipafont-gothic
+
+# ファイルのアップロード処理# 
+
+from google.colab import files
+
+uploaded = files.upload()
+
+# 必要なライブラリをインポート# 
+
+#import pandas as pd
+#import io
+#import matplotlib.pyplot as plt
+#import re
+
+# データを確認# 
+
+# 読み込んだデータをpandasのdataframeで扱えるようにする
+#df = pd.read_csv(io.StringIO(uploaded['merosu.txt'].decode('utf-8')))
+
+# 中身を確認する
+#df.head()
+
+# テキストで不要な文言を除く# 
+
+def normalize_text(text):
+    text = re.sub(r'\[.*?\]', "", text)
+    text = re.sub(r'#', "", text)
+    text = re.sub(r'\!', "", text)
+    text = re.sub(r'\(.*', "", text)
+    text = re.sub(r'.*\)', "", text)
+    text = re.sub(r'\*', "", text)
+    text = re.sub(r'\n', "", text)
+    text = re.sub(r'\$.*', "", text)
+    text = re.sub(r'`.*`', "", text)
+    text = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
+    text = re.sub('関連記事', "", text)
+    text = re.sub('以下', "", text)
+    text = re.sub('こと', "", text)
+    text = re.sub('の', "", text)
+    text = re.sub('さ', "", text)
+    text = re.sub('これ', "", text)
+    text = re.sub('よう', "", text)
+    text = text.strip()
+    return text
+
+# テキスト処理# 
+
+with open('merosu.txt','r') as f:
+    text_list_from_txt = f.readlines()
+
+# テキストをリストへ読み込む# 
+
+text_list = []
+for text in text_list_from_txt:
+    text = normalize_text(text)
+    text_list.append(text)
+
+# 日本語をことばで切るためにJanomeをインストール# 
+
+!pip install janome
+
+# Janomeのしたごしらえ# 
+
+from janome.tokenizer import Tokenizer
+from collections import Counter, defaultdict
+
+# カウント処理# 
+
+def counter(texts):
+    t = Tokenizer()
+    words_count = defaultdict(int)
+    words = []
+    for text in texts:
+        tokens = t.tokenize(text)
+        for token in tokens:
+            # 品詞から名詞だけ抽出
+            pos = token.part_of_speech.split(',')[0]
+            if pos == '名詞':
+                words_count[token.base_form] += 1
+                words.append(token.base_form)
+    return words_count, words
+
+words_count, words = counter(text_list)
+text = ' '.join(words)
+# print(text) for debug
+
+# 中間結果をファイルへ保存# 
+
+with open('analysis_text.txt', 'w', encoding='utf-8') as f:
+    f.write(text)
+# files.download('analysis_text.txt')
+
+# カウント処理をかいていく。必要なライブラリをインポート# 
+
+!pip install wordcloud
+
+from wordcloud import WordCloud
+
+f = open('analysis_text.txt')
+text = f.read()
+f.close()
+
+# ディレクトリを確認# 
+
+!cd ../../
+!ls
+
+# フォントを利用して描画# 
+
+fpath = '/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf'
+wordcloud = WordCloud(background_color="white", font_path=fpath, width=900, height=500).generate(text)
+plt.figure(figsize=(15,12))
+plt.imshow(wordcloud)
+plt.axis("off")
+plt.show()
